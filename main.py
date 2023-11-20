@@ -1,5 +1,6 @@
 from random import randint
 from database import database
+from placar import ranking
 
 def sequencia(streak = 0):
 	if streak < 3:
@@ -55,3 +56,5 @@ for c in range(len(data)):
 	print(f"pontos: {data[c][1]}")
 	if(c == 2):
 		break
+
+ranking(data[0][0], data[1][0], data[2][0])

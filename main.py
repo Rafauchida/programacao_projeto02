@@ -1,60 +1,70 @@
-from random import randint
+import random
+from time import sleep
 from database import database
-from placar import ranking
+import placar
 
-def sequencia(streak = 0):
-	if streak < 3:
-		return False
-	if streak >= 3:
-		return True
-	
-def par_verification(player = 2):
-	if player % 2 == 0:
-		return True
-	else:
-		return False
 
-pontos = 0
-streak = 0
-player_name = input("Digite o seu nome: ")
+def shuffle(slots = ["Apple", "Orange", "Banana"]): # randomize the results
+    slot1 = random.choice(slots)
+    slot2 = random.choice(slots)
+    slot3 = random.choice(slots)
+    res = [slot1, slot2, slot3]
+    return res
 
-while True:
-	computer = randint(1, 5)
-	bonus = sequencia(streak)
-	player = int(input("Digite um número entre 1-5: "))
-	while player not in [0, 1, 2, 3, 4, 5]:
-		player = int(input("Favor digitar um número entre 1-5: "))
-	if player == 0:
-		break
-	elif player == computer:
-		if bonus:
-			pontos += (streak * pontos)
-			bonus = streak * pontos
-		else:
-			pontos += 1
-			bonus = 1
-		streak += 1
-		print(f"Você ganhou {bonus} pontos! O número era {computer} e você escolheu {player}")
-		print(f"streak: {streak}")
-		print(f"pontos: {pontos}")
-	else:
-		streak = 0
-		print(f"Você errou! O número escolhido era {computer} e você digitou {player}")
-		print(f"streak: {streak}")
-		print(f"pontos: {pontos}")
+def result(res):# print the results from the roll
+    for c in res:
+        print(f"|| {c} ||", end='')
+    sleep(1)
+    print()
 
-	if par_verification(player):
-		print(f"O seu número é par")
-	else:
-		print(f"O seu número não é par")
+def head(sample): #create the head to the text
+    print(40*"-")
+    print(sample)
+    print(40*"-")
 
-database.insert(player_name, pontos)
-data = database.get_balance()
+def results_verify(res = ["Apple", "Orange", "Banana"]):
+    reward = 0
+    for c in range(2):
+        for a in res:
+            if res[c] == a:
+                reward += 1
+    if reward == 2:
+        reward = -3
+    if reward == 3 or reward == 4:
+        reward = 0
+    if reward == 6:
+        reward = 3
+    return reward
 
-for c in range(len(data)):
-	print(f"{c+1}° lugar: {data[c][0]}")
-	print(f"pontos: {data[c][1]}")
-	if(c == 2):
-		break
 
-ranking(data[0][0], data[1][0], data[2][0])
+placar.game()
+
+head(f"Cada tentativa custa R${1:.2f}")
+saldo = 0
+nome = input("Digite o seu nome: ")
+print(f"Saldo atual: {saldo}")
+dinheiro = int(input("Quantos reais deseja colocar?\nSaldo: "))
+saldo += dinheiro
+while saldo >= 1:
+    res = shuffle()
+    combinacao = ' '.join(res)
+    result(res)
+    recompensa = results_verify(res)
+    saldo += recompensa
+    print(f"Você recebeu {recompensa} \n Saldo: {saldo}")
+    play = input("Você quer continuar jogando?\n")
+    while play.lower() not in ["sim", "s", "n", "nao"]:
+        print("Por favor digite somente 'sim' ou 'nao'")
+        play = input("Você quer continuar jogando?\n")
+    if play.lower() in ["nao", "n"]:
+        break
+if saldo <= 0:
+    print("Desculpe, sem dinheiro suficiente para jogar")
+
+database.insert(nome, saldo)
+
+head("Resultado final")
+print(f"Saldo Final: {saldo}")
+
+leaderboard = database.ranking()
+xplacar.ranking(leaderboard[0][0], leaderboard[1][0], leaderboard[2][0])

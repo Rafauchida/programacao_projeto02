@@ -5,7 +5,7 @@ db = mysql.connect(
     host = "localhost",
     user = "root",
     password = "rouben10",
-    database = "number_game"
+    database = "cassino"
 )
 
 mycursor = db.cursor()
@@ -14,16 +14,18 @@ mycursor = db.cursor()
 class database:
     def insert(name, points):
         try:
-            mycursor.execute("create table if not exists leaderboard(id int not null auto_increment primary key, time date, name char(30), points int);")
+            mycursor.execute("create table IF NOT EXISTS leaderboards(id int not null auto_increment primary key, time date not null, name char(30) default 'None', points int);")
             db.commit()
         finally:
-            mycursor.execute("insert into leaderboard(id, time, name, points) values(default, %s, %s, %s);", (datetime.now().isoformat(timespec="hours"), name, points))
+            mycursor.execute("insert into leaderboards(id, time, name, points) values(default, %s, %s, %s);", (datetime.now().isoformat(timespec="hours"), name, points))
             db.commit()
 
-    def get_balance():
-        mycursor.execute("select name from leaderboard order by points desc;")
+
+
+    def ranking():
+        mycursor.execute("select name from leaderboards order by points desc;")
         names = mycursor.fetchall()
-        mycursor.execute("select points from leaderboard order by points desc;")
+        mycursor.execute("select points from leaderboards order by points desc;")
         points = mycursor.fetchall()
         players = []
         for c in range(len(names)):
